@@ -961,6 +961,8 @@ static void handle_builtintopic_endpoint(
             s->topic_name, s->type_name,
             static_cast<int>(userdata_size), reinterpret_cast<char *>(userdata));
           type_hash = rosidl_get_zero_initialized_type_hash();
+          // We've handled the error, so clear it out.
+          rmw_reset_error();
         }
       }
 
@@ -2084,6 +2086,7 @@ static rmw_ret_t publish_loaned_int(
 
   // if the publisher allow loaning
   if (cdds_publisher->is_loaning_available) {
+    TRACETOOLS_TRACEPOINT(rmw_publish, ros_message);
     auto d = new serdata_rmw(cdds_publisher->sertype, ddsi_serdata_kind::SDK_DATA);
     d->iox_chunk = ros_message;
     // since we write the loaned chunk here, set the data state to raw
@@ -2293,6 +2296,8 @@ static dds_qos_t * create_readwrite_qos(
       "rmw_cyclonedds_cpp",
       "Failed to encode type hash for topic, will not distribute it in USER_DATA.");
     typehash_str.clear();
+    // We've handled the error, so clear it out.
+    rmw_reset_error();
   }
   std::string user_data = extra_user_data + typehash_str;
   dds_qset_userdata(qos, user_data.data(), user_data.size());
