@@ -1,0 +1,12 @@
+Source: ros-rolling-rmw-cyclonedds-cpp
+Section: misc
+Priority: optional
+Maintainer: Erik Boasson <erik.boasson@adlinktech.com>
+Build-Depends: debhelper (>= 9.0.0), ament-cmake-copyright <!nocheck>, ament-cmake-cppcheck <!nocheck>, ament-cmake-cpplint <!nocheck>, ament-cmake-flake8 <!nocheck>, ament-cmake-lint-cmake <!nocheck>, ament-cmake-pep257 <!nocheck>, ament-cmake-ros, ament-cmake-uncrustify <!nocheck>, ament-cmake-xmllint <!nocheck>, ament-lint <!nocheck>, cyclonedds-dev, libiceoryx-binding-c-dev, librcpputils-dev, librcutils-dev, librosidl-runtime-c-cpp-dev, librosidl-typesupport-introspection-c-cpp-dev, python3-rcutils, ros-rolling-rmw, ros-rolling-rmw-dds-common, ros-rolling-tracetools, ros-rolling-ros-workspace
+Homepage: 
+Standards-Version: 3.9.2
+
+Package: ros-rolling-rmw-cyclonedds-cpp
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, cyclonedds-dev, libiceoryx-binding-c-dev, librcpputils-dev, librcutils-dev, librosidl-runtime-c-cpp-dev, librosidl-typesupport-introspection-c-cpp-dev, python3-rcutils, ros-rolling-rmw, ros-rolling-rmw-dds-common, ros-rolling-tracetools, ros-rolling-ros-workspace
+Description: Implement the ROS middleware interface using Eclipse CycloneDDS in C++.
