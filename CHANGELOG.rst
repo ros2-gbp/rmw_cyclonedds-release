@@ -2,6 +2,12 @@
 Changelog for package rmw_cyclonedds_cpp
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.2.0 (2024-04-09)
+------------------
+* Add tracepoint for publish/subscribe serialized message (`#485 <https://github.com/ros2/rmw_cyclonedds/issues/485>`_)
+  Co-authored-by: eboasson <eb@ilities.com>
+* Contributors: h-suzuki-isp
+
 2.1.1 (2024-03-28)
 ------------------
 * Remove a bunch of unnecessary macros. (`#482 <https://github.com/ros2/rmw_cyclonedds/issues/482>`_)
