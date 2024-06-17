@@ -1698,7 +1698,7 @@ extern "C" rmw_node_t * rmw_create_node(
     return nullptr;
   }
   if (RMW_NAMESPACE_VALID != validation_result) {
-    const char * reason = rmw_node_name_validation_result_string(validation_result);
+    const char * reason = rmw_namespace_validation_result_string(validation_result);
     RMW_SET_ERROR_MSG_WITH_FORMAT_STRING("invalid node namespace: %s", reason);
     return nullptr;
   }
@@ -4195,7 +4195,7 @@ fail_alloc_wait_set:
 
 extern "C" rmw_ret_t rmw_destroy_wait_set(rmw_wait_set_t * wait_set)
 {
-  RET_NULL(wait_set);
+  RMW_CHECK_ARGUMENT_FOR_NULL(wait_set, RMW_RET_INVALID_ARGUMENT);
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
     wait_set, wait_set->implementation_identifier,
     eclipse_cyclonedds_identifier, return RMW_RET_INCORRECT_RMW_IMPLEMENTATION);
@@ -5464,15 +5464,15 @@ extern "C" rmw_ret_t rmw_service_server_is_available(
   const rmw_client_t * client,
   bool * is_available)
 {
-  RET_NULL(node);
+  RMW_CHECK_ARGUMENT_FOR_NULL(node, RMW_RET_INVALID_ARGUMENT);
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
     node, node->implementation_identifier,
     eclipse_cyclonedds_identifier, return RMW_RET_INCORRECT_RMW_IMPLEMENTATION);
-  RET_NULL(client);
+  RMW_CHECK_ARGUMENT_FOR_NULL(client, RMW_RET_INVALID_ARGUMENT);
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
     client, client->implementation_identifier,
     eclipse_cyclonedds_identifier, return RMW_RET_INCORRECT_RMW_IMPLEMENTATION);
-  RET_NULL(is_available);
+  RMW_CHECK_ARGUMENT_FOR_NULL(is_available, RMW_RET_INVALID_ARGUMENT);
   *is_available = false;
 
   auto info = static_cast<CddsClient *>(client->data);
