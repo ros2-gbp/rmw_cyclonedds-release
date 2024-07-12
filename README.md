@@ -1,3 +1,26 @@
+## rmw_cyclonedds (jazzy) - 2.2.2-1
+
+The packages in the `rmw_cyclonedds` repository were released into the `jazzy` distro by running `/usr/bin/bloom-release --rosdistro jazzy --track jazzy rmw_cyclonedds` on `Fri, 12 Jul 2024 10:27:38 -0000`
+
+The `rmw_cyclonedds_cpp` package was released.
+
+Version of package(s) in repository `rmw_cyclonedds`:
+
+- upstream repository: https://github.com/ros2/rmw_cyclonedds.git
+- release repository: https://github.com/ros2-gbp/rmw_cyclonedds-release.git
+- rosdistro version: `2.2.1-1`
+- old version: `2.2.1-1`
+- new version: `2.2.2-1`
+
+Versions of tools used:
+
+- bloom version: `0.12.0`
+- catkin_pkg version: `0.5.2`
+- rosdep version: `0.24.0`
+- rosdistro version: `0.9.1`
+- vcstools version: `0.1.42`
+
+
 ## rmw_cyclonedds (rolling) - 3.0.1-1
 
 The packages in the `rmw_cyclonedds` repository were released into the `rolling` distro by running `/usr/bin/bloom-release --rosdistro rolling --track rolling rmw_cyclonedds` on `Fri, 12 Jul 2024 10:24:20 -0000`
