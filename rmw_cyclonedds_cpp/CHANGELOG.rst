@@ -2,25 +2,26 @@
 Changelog for package rmw_cyclonedds_cpp
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-3.0.1 (2024-07-12)
+2.2.2 (2024-07-12)
 ------------------
-* Fix the triggering of guard conditions. (`#504 <https://github.com/ros2/rmw_cyclonedds/issues/504>`_)
+* Fix the triggering of guard conditions. (`#504 <https://github.com/ros2/rmw_cyclonedds/issues/504>`_) (`#505 <https://github.com/ros2/rmw_cyclonedds/issues/505>`_)
   When a guard condition goes active, we have to remember
   to increase the trig_idx so we look at the next trigger.
   Otherwise, we can get into situations where we skip a
   triggered member.
-* Contributors: Chris Lalancette
+  (cherry picked from commit 899bbdf73fb57c8f5926b31e9570f017b8c2fdb9)
+  Co-authored-by: Chris Lalancette <clalancette@gmail.com>
+* Contributors: mergify[bot]
 
-3.0.0 (2024-06-17)
+2.2.1 (2024-05-13)
 ------------------
-* Make rmw_service_server_is_available return RMW_RET_INVALID_ARGUMENT (`#496 <https://github.com/ros2/rmw_cyclonedds/issues/496>`_)
-* Use rmw_namespace_validation_result_string() in rmw_create_node (`#497 <https://github.com/ros2/rmw_cyclonedds/issues/497>`_)
-* Make rmw_destroy_wait_set return RMW_RET_INVALID_ARGUMENT (`#498 <https://github.com/ros2/rmw_cyclonedds/issues/498>`_)
-* Set received_timestamp to system_clock::now() in message_info (`#491 <https://github.com/ros2/rmw_cyclonedds/issues/491>`_)
-* Contributors: Christophe Bedard, Michael Orlov
-
-2.3.0 (2024-04-26)
-------------------
+* Set received_timestamp to system_clock::now() in message_info (`#491 <https://github.com/ros2/rmw_cyclonedds/issues/491>`_) (`#493 <https://github.com/ros2/rmw_cyclonedds/issues/493>`_)
+  * Set received_timestamp to steady_clock::now() in message_info
+  * Use 'system_clock' instead of 'steady_clock'
+  * Also update receive_timestamp for services.
+  (cherry picked from commit 76c9d8f38a03d160b258902af6d1d06f6ed9391e)
+  Co-authored-by: Michael Orlov <morlovmr@gmail.com>
+* Contributors: mergify[bot]
 
 2.2.0 (2024-04-09)
 ------------------
