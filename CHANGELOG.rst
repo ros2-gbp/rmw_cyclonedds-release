@@ -2,6 +2,13 @@
 Changelog for package rmw_cyclonedds_cpp
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.2.1 (2025-02-17)
+------------------
+* use rmw_security_common (`#529 <https://github.com/ros2/rmw_cyclonedds/issues/529>`_)
+* introduce RMW_EVENT_TYPE_MAX in rmw_event_type_t. (`#518 <https://github.com/ros2/rmw_cyclonedds/issues/518>`_)
+* Reset the error before setting a new one. (`#526 <https://github.com/ros2/rmw_cyclonedds/issues/526>`_)
+* Contributors: Alejandro Hernández Cordero, Chris Lalancette, Tomoya Fujita
+
 3.2.0 (2024-12-20)
 ------------------
 * Instrument client/service for end-to-end request/response tracking (`#521 <https://github.com/ros2/rmw_cyclonedds/issues/521>`_)
