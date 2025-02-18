@@ -1,1 +1,1 @@
-{"base": "fc38110", "parent": "debian/rolling/rmw_cyclonedds_cpp", "previous": "1975a90", "trim": "", "trimbase": ""}
+{"base": "1855afb", "parent": "debian/rolling/rmw_cyclonedds_cpp", "previous": "b4176b7", "trim": "", "trimbase": ""}
