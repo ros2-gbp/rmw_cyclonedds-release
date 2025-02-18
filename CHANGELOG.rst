@@ -2,6 +2,9 @@
 Changelog for package rmw_cyclonedds_cpp
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+4.0.0 (2025-02-18)
+------------------
+
 3.2.1 (2025-02-17)
 ------------------
 * use rmw_security_common (`#529 <https://github.com/ros2/rmw_cyclonedds/issues/529>`_)
