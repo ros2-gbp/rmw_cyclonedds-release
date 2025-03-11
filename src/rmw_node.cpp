@@ -795,15 +795,19 @@ extern "C" rmw_ret_t rmw_init_options_copy(const rmw_init_options_t * src, rmw_i
   const rcutils_allocator_t * allocator = &src->allocator;
 
   rmw_init_options_t tmp = *src;
-  tmp.enclave = rcutils_strdup(tmp.enclave, *allocator);
-  if (NULL != src->enclave && NULL == tmp.enclave) {
-    return RMW_RET_BAD_ALLOC;
+  rmw_ret_t ret;
+  if (src->enclave != NULL) {
+    ret = rmw_enclave_options_copy(src->enclave, allocator, &tmp.enclave);
+    if (RMW_RET_OK != ret) {
+      return ret;
+    }
   }
   tmp.security_options = rmw_get_zero_initialized_security_options();
-  rmw_ret_t ret =
+  ret =
     rmw_security_options_copy(&src->security_options, allocator, &tmp.security_options);
   if (RMW_RET_OK != ret) {
-    allocator->deallocate(tmp.enclave, allocator->state);
+    rmw_enclave_options_fini(tmp.enclave, allocator);
+    // Error already set
     return ret;
   }
   *dst = tmp;
@@ -823,8 +827,14 @@ extern "C" rmw_ret_t rmw_init_options_fini(rmw_init_options_t * init_options)
   rcutils_allocator_t * allocator = &init_options->allocator;
   RCUTILS_CHECK_ALLOCATOR(allocator, return RMW_RET_INVALID_ARGUMENT);
 
-  allocator->deallocate(init_options->enclave, allocator->state);
-  rmw_ret_t ret = rmw_security_options_fini(&init_options->security_options, allocator);
+  rmw_ret_t ret;
+  if (init_options->enclave != NULL) {
+    ret = rmw_enclave_options_fini(init_options->enclave, allocator);
+    if (ret != RMW_RET_OK) {
+      return ret;
+    }
+  }
+  ret = rmw_security_options_fini(&init_options->security_options, allocator);
   *init_options = rmw_get_zero_initialized_init_options();
   return ret;
 }
@@ -3898,6 +3908,11 @@ extern "C" rmw_ret_t rmw_subscription_event_init(
     subscription->implementation_identifier,
     subscription->data,
     event_type);
+}
+
+extern "C" bool rmw_event_type_is_supported(rmw_event_type_t rmw_event_type)
+{
+  return is_event_supported(rmw_event_type);
 }
 
 extern "C" rmw_ret_t rmw_take_event(

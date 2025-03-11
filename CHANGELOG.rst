@@ -2,6 +2,12 @@
 Changelog for package rmw_cyclonedds_cpp
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+4.0.1 (2025-03-11)
+------------------
+* Added rmw_event_type_is_supported (`#532 <https://github.com/ros2/rmw_cyclonedds/issues/532>`_)
+* use rmw_enclave_options_xxx APIs instead. (`#531 <https://github.com/ros2/rmw_cyclonedds/issues/531>`_)
+* Contributors: Alejandro Hernández Cordero, Tomoya Fujita
+
 4.0.0 (2025-02-18)
 ------------------
 
