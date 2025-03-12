@@ -2,6 +2,11 @@
 Changelog for package rmw_cyclonedds_cpp
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.2.3 (2025-03-12)
+------------------
+* Added rmw_event_type_is_supported (`#532 <https://github.com/ros2/rmw_cyclonedds/issues/532>`_) (`#534 <https://github.com/ros2/rmw_cyclonedds/issues/534>`_)
+* Contributors: mergify[bot]
+
 2.2.2 (2024-07-12)
 ------------------
 * Fix the triggering of guard conditions. (`#504 <https://github.com/ros2/rmw_cyclonedds/issues/504>`_) (`#505 <https://github.com/ros2/rmw_cyclonedds/issues/505>`_)
