@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>rmw_cyclonedds_cpp</name>
-  <version>4.0.1</version>
+  <version>2.2.3</version>
   <description>Implement the ROS middleware interface using Eclipse CycloneDDS in C++.</description>
 
   <maintainer email="erik.boasson@adlinktech.com">Erik Boasson</maintainer>
@@ -20,7 +20,6 @@
   <depend>rcpputils</depend>
   <depend>rmw</depend>
   <depend>rmw_dds_common</depend>
-  <depend>rmw_security_common</depend>
   <depend>rosidl_runtime_c</depend>
   <depend>rosidl_typesupport_introspection_c</depend>
   <depend>rosidl_typesupport_introspection_cpp</depend>

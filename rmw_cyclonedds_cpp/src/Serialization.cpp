@@ -328,6 +328,8 @@ protected:
       case ROSIDL_TypeKind::INT64:
       case ROSIDL_TypeKind::DOUBLE:
         return 8;
+      case ROSIDL_TypeKind::LONG_DOUBLE:
+        return 16;
       default:
         return 0;
     }
@@ -441,6 +443,10 @@ protected:
         return;
       case ROSIDL_TypeKind::DOUBLE:
         assert(std::numeric_limits<double>::is_iec559);
+        cursor->put_bytes(data, n_bytes);
+        return;
+      case ROSIDL_TypeKind::LONG_DOUBLE:
+        assert(std::numeric_limits<long double>::is_iec559);
         cursor->put_bytes(data, n_bytes);
         return;
       case ROSIDL_TypeKind::CHAR:
