@@ -2,31 +2,66 @@
 Changelog for package rmw_cyclonedds_cpp
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-2.2.3 (2025-03-12)
+4.0.2 (2025-04-18)
 ------------------
-* Added rmw_event_type_is_supported (`#532 <https://github.com/ros2/rmw_cyclonedds/issues/532>`_) (`#534 <https://github.com/ros2/rmw_cyclonedds/issues/534>`_)
-* Contributors: mergify[bot]
+* Switch to ament_cmake_ros_core package (`#538 <https://github.com/ros2/rmw_cyclonedds/issues/538>`_)
+* Contributors: Scott K Logan
 
-2.2.2 (2024-07-12)
+4.0.1 (2025-03-11)
 ------------------
-* Fix the triggering of guard conditions. (`#504 <https://github.com/ros2/rmw_cyclonedds/issues/504>`_) (`#505 <https://github.com/ros2/rmw_cyclonedds/issues/505>`_)
+* Added rmw_event_type_is_supported (`#532 <https://github.com/ros2/rmw_cyclonedds/issues/532>`_)
+* use rmw_enclave_options_xxx APIs instead. (`#531 <https://github.com/ros2/rmw_cyclonedds/issues/531>`_)
+* Contributors: Alejandro Hernández Cordero, Tomoya Fujita
+
+4.0.0 (2025-02-18)
+------------------
+
+3.2.1 (2025-02-17)
+------------------
+* use rmw_security_common (`#529 <https://github.com/ros2/rmw_cyclonedds/issues/529>`_)
+* introduce RMW_EVENT_TYPE_MAX in rmw_event_type_t. (`#518 <https://github.com/ros2/rmw_cyclonedds/issues/518>`_)
+* Reset the error before setting a new one. (`#526 <https://github.com/ros2/rmw_cyclonedds/issues/526>`_)
+* Contributors: Alejandro Hernández Cordero, Chris Lalancette, Tomoya Fujita
+
+3.2.0 (2024-12-20)
+------------------
+* Instrument client/service for end-to-end request/response tracking (`#521 <https://github.com/ros2/rmw_cyclonedds/issues/521>`_)
+* Contributors: Christophe Bedard
+
+3.1.0 (2024-11-25)
+------------------
+* Drop support for float128. (`#522 <https://github.com/ros2/rmw_cyclonedds/issues/522>`_)
+* Contributors: Chris Lalancette
+
+3.0.3 (2024-11-20)
+------------------
+* use RMW_GID_STORAGE_SIZE to client_service_id_t. (`#515 <https://github.com/ros2/rmw_cyclonedds/issues/515>`_)
+* Contributors: Tomoya Fujita
+
+3.0.2 (2024-07-29)
+------------------
+* remove rmw_localhost_only_t. (`#508 <https://github.com/ros2/rmw_cyclonedds/issues/508>`_)
+* Contributors: Tomoya Fujita
+
+3.0.1 (2024-07-12)
+------------------
+* Fix the triggering of guard conditions. (`#504 <https://github.com/ros2/rmw_cyclonedds/issues/504>`_)
   When a guard condition goes active, we have to remember
   to increase the trig_idx so we look at the next trigger.
   Otherwise, we can get into situations where we skip a
   triggered member.
-  (cherry picked from commit 899bbdf73fb57c8f5926b31e9570f017b8c2fdb9)
-  Co-authored-by: Chris Lalancette <clalancette@gmail.com>
-* Contributors: mergify[bot]
+* Contributors: Chris Lalancette
 
-2.2.1 (2024-05-13)
+3.0.0 (2024-06-17)
 ------------------
-* Set received_timestamp to system_clock::now() in message_info (`#491 <https://github.com/ros2/rmw_cyclonedds/issues/491>`_) (`#493 <https://github.com/ros2/rmw_cyclonedds/issues/493>`_)
-  * Set received_timestamp to steady_clock::now() in message_info
-  * Use 'system_clock' instead of 'steady_clock'
-  * Also update receive_timestamp for services.
-  (cherry picked from commit 76c9d8f38a03d160b258902af6d1d06f6ed9391e)
-  Co-authored-by: Michael Orlov <morlovmr@gmail.com>
-* Contributors: mergify[bot]
+* Make rmw_service_server_is_available return RMW_RET_INVALID_ARGUMENT (`#496 <https://github.com/ros2/rmw_cyclonedds/issues/496>`_)
+* Use rmw_namespace_validation_result_string() in rmw_create_node (`#497 <https://github.com/ros2/rmw_cyclonedds/issues/497>`_)
+* Make rmw_destroy_wait_set return RMW_RET_INVALID_ARGUMENT (`#498 <https://github.com/ros2/rmw_cyclonedds/issues/498>`_)
+* Set received_timestamp to system_clock::now() in message_info (`#491 <https://github.com/ros2/rmw_cyclonedds/issues/491>`_)
+* Contributors: Christophe Bedard, Michael Orlov
+
+2.3.0 (2024-04-26)
+------------------
 
 2.2.0 (2024-04-09)
 ------------------

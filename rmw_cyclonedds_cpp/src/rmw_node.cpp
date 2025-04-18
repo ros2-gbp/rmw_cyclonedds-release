@@ -76,7 +76,8 @@
 #include "rmw_dds_common/graph_cache.hpp"
 #include "rmw_dds_common/msg/participant_entities_info.hpp"
 #include "rmw_dds_common/qos.hpp"
-#include "rmw_dds_common/security.hpp"
+
+#include "rmw_security_common/security.hpp"
 
 #include "rosidl_runtime_c/type_hash.h"
 
@@ -361,9 +362,7 @@ struct CddsSubscription : CddsEntity
 
 struct client_service_id_t
 {
-  // strangely, the writer_guid in an rmw_request_id_t is smaller than the identifier in
-  // an rmw_gid_t
-  uint8_t data[sizeof((reinterpret_cast<rmw_request_id_t *>(0))->writer_guid)]; // NOLINT
+  uint8_t data[RMW_GID_STORAGE_SIZE];
 };
 
 struct CddsCS
@@ -749,6 +748,7 @@ extern "C" rmw_ret_t rmw_event_set_callback(
       }
 
     case RMW_EVENT_INVALID:
+    case RMW_EVENT_TYPE_MAX:
       {
         return RMW_RET_INVALID_ARGUMENT;
       }
@@ -770,7 +770,6 @@ extern "C" rmw_ret_t rmw_init_options_init(
   init_options->implementation_identifier = eclipse_cyclonedds_identifier;
   init_options->allocator = allocator;
   init_options->impl = nullptr;
-  init_options->localhost_only = RMW_LOCALHOST_ONLY_DEFAULT;
   init_options->discovery_options = rmw_get_zero_initialized_discovery_options(),
   init_options->domain_id = RMW_DEFAULT_DOMAIN_ID;
   init_options->enclave = NULL;
@@ -796,15 +795,19 @@ extern "C" rmw_ret_t rmw_init_options_copy(const rmw_init_options_t * src, rmw_i
   const rcutils_allocator_t * allocator = &src->allocator;
 
   rmw_init_options_t tmp = *src;
-  tmp.enclave = rcutils_strdup(tmp.enclave, *allocator);
-  if (NULL != src->enclave && NULL == tmp.enclave) {
-    return RMW_RET_BAD_ALLOC;
+  rmw_ret_t ret;
+  if (src->enclave != NULL) {
+    ret = rmw_enclave_options_copy(src->enclave, allocator, &tmp.enclave);
+    if (RMW_RET_OK != ret) {
+      return ret;
+    }
   }
   tmp.security_options = rmw_get_zero_initialized_security_options();
-  rmw_ret_t ret =
+  ret =
     rmw_security_options_copy(&src->security_options, allocator, &tmp.security_options);
   if (RMW_RET_OK != ret) {
-    allocator->deallocate(tmp.enclave, allocator->state);
+    rmw_enclave_options_fini(tmp.enclave, allocator);
+    // Error already set
     return ret;
   }
   *dst = tmp;
@@ -824,8 +827,14 @@ extern "C" rmw_ret_t rmw_init_options_fini(rmw_init_options_t * init_options)
   rcutils_allocator_t * allocator = &init_options->allocator;
   RCUTILS_CHECK_ALLOCATOR(allocator, return RMW_RET_INVALID_ARGUMENT);
 
-  allocator->deallocate(init_options->enclave, allocator->state);
-  rmw_ret_t ret = rmw_security_options_fini(&init_options->security_options, allocator);
+  rmw_ret_t ret;
+  if (init_options->enclave != NULL) {
+    ret = rmw_enclave_options_fini(init_options->enclave, allocator);
+    if (ret != RMW_RET_OK) {
+      return ret;
+    }
+  }
+  ret = rmw_security_options_fini(&init_options->security_options, allocator);
   *init_options = rmw_get_zero_initialized_init_options();
   return ret;
 }
@@ -1272,25 +1281,48 @@ rmw_ret_t configure_qos_for_security(
   const rmw_security_options_t * security_options)
 {
 #if RMW_SUPPORT_SECURITY
-  std::unordered_map<std::string, std::string> security_files;
+  rcutils_allocator_t allocator = rcutils_get_default_allocator();
+  rcutils_string_map_t security_files = rcutils_get_zero_initialized_string_map();
+  rcutils_ret_t ret = rcutils_string_map_init(&security_files, 0, allocator);
+
+  if (ret != RMW_RET_OK) {
+    RMW_SET_ERROR_MSG("Failed to initialize string map for security");
+    return RMW_RET_ERROR;
+  }
+
+  auto scope_exit_ws = rcpputils::make_scope_exit(
+    [&security_files]()
+    {
+      rcutils_ret_t ret = rcutils_string_map_fini(&security_files);
+      if (ret != RMW_RET_OK) {
+        RMW_SET_ERROR_MSG("Failed to fini string map for security");
+      }
+    });
+
   if (security_options->security_root_path == nullptr) {
     return RMW_RET_UNSUPPORTED;
   }
 
-  if (!rmw_dds_common::get_security_files(
-      "file:", security_options->security_root_path, security_files))
+  if (get_security_files(
+      "file:", security_options->security_root_path, &security_files) != RMW_RET_OK)
   {
     RCUTILS_LOG_INFO_NAMED(
       "rmw_cyclonedds_cpp", "could not find all security files");
     return RMW_RET_UNSUPPORTED;
   }
 
-  dds_qset_prop(qos, "dds.sec.auth.identity_ca", security_files["IDENTITY_CA"].c_str());
-  dds_qset_prop(qos, "dds.sec.auth.identity_certificate", security_files["CERTIFICATE"].c_str());
-  dds_qset_prop(qos, "dds.sec.auth.private_key", security_files["PRIVATE_KEY"].c_str());
-  dds_qset_prop(qos, "dds.sec.access.permissions_ca", security_files["PERMISSIONS_CA"].c_str());
-  dds_qset_prop(qos, "dds.sec.access.governance", security_files["GOVERNANCE"].c_str());
-  dds_qset_prop(qos, "dds.sec.access.permissions", security_files["PERMISSIONS"].c_str());
+  dds_qset_prop(qos, "dds.sec.auth.identity_ca",
+    std::string(rcutils_string_map_get(&security_files, "IDENTITY_CA")).c_str());
+  dds_qset_prop(qos, "dds.sec.auth.identity_certificate",
+    std::string(rcutils_string_map_get(&security_files, "CERTIFICATE")).c_str());
+  dds_qset_prop(qos, "dds.sec.auth.private_key",
+    std::string(rcutils_string_map_get(&security_files, "PRIVATE_KEY")).c_str());
+  dds_qset_prop(qos, "dds.sec.access.permissions_ca",
+    std::string(rcutils_string_map_get(&security_files, "PERMISSIONS_CA")).c_str());
+  dds_qset_prop(qos, "dds.sec.access.governance",
+    std::string(rcutils_string_map_get(&security_files, "GOVERNANCE")).c_str());
+  dds_qset_prop(qos, "dds.sec.access.permissions",
+    std::string(rcutils_string_map_get(&security_files, "PERMISSIONS")).c_str());
 
   dds_qset_prop(qos, "dds.sec.auth.library.path", "dds_security_auth");
   dds_qset_prop(qos, "dds.sec.auth.library.init", "init_authentication");
@@ -1304,8 +1336,10 @@ rmw_ret_t configure_qos_for_security(
   dds_qset_prop(qos, "dds.sec.access.library.init", "init_access_control");
   dds_qset_prop(qos, "dds.sec.access.library.finalize", "finalize_access_control");
 
-  if (security_files.count("CRL") > 0) {
-    dds_qset_prop(qos, "org.eclipse.cyclonedds.sec.auth.crl", security_files["CRL"].c_str());
+  if (rcutils_string_map_key_exists(&security_files, "CRL")) {
+    dds_qset_prop(
+      qos, "org.eclipse.cyclonedds.sec.auth.crl",
+      std::string(rcutils_string_map_get(&security_files, "CRL")).c_str());
   }
 
   return RMW_RET_OK;
@@ -1698,7 +1732,7 @@ extern "C" rmw_node_t * rmw_create_node(
     return nullptr;
   }
   if (RMW_NAMESPACE_VALID != validation_result) {
-    const char * reason = rmw_node_name_validation_result_string(validation_result);
+    const char * reason = rmw_namespace_validation_result_string(validation_result);
     RMW_SET_ERROR_MSG_WITH_FORMAT_STRING("invalid node namespace: %s", reason);
     return nullptr;
   }
@@ -1814,6 +1848,7 @@ extern "C" rmw_ret_t rmw_serialize(
     auto size = writer->get_serialized_size(ros_message);
     rmw_ret_t ret = rmw_serialized_message_resize(serialized_message, size);
     if (RMW_RET_OK != ret) {
+      rmw_reset_error();
       RMW_SET_ERROR_MSG("rmw_serialize: failed to allocate space for message");
       return ret;
     }
@@ -4069,12 +4104,10 @@ extern "C" rmw_ret_t rmw_take_event(
         return RMW_RET_OK;
       }
 
-    case RMW_EVENT_INVALID: {
+    case RMW_EVENT_INVALID:
+    case RMW_EVENT_TYPE_MAX: {
         break;
       }
-
-    default:
-      rmw_cyclonedds_cpp::unreachable();
   }
   *taken = false;
   return RMW_RET_ERROR;
@@ -4200,7 +4233,7 @@ fail_alloc_wait_set:
 
 extern "C" rmw_ret_t rmw_destroy_wait_set(rmw_wait_set_t * wait_set)
 {
-  RET_NULL(wait_set);
+  RMW_CHECK_ARGUMENT_FOR_NULL(wait_set, RMW_RET_INVALID_ARGUMENT);
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
     wait_set, wait_set->implementation_identifier,
     eclipse_cyclonedds_identifier, return RMW_RET_INCORRECT_RMW_IMPLEMENTATION);
@@ -4684,6 +4717,14 @@ extern "C" rmw_ret_t rmw_take_response(
     info->reqtime.erase(seq);
   }
 #endif
+  TRACETOOLS_TRACEPOINT(
+    rmw_take_response,
+    static_cast<const void *>(client),
+    static_cast<const void *>(ros_response),
+    (nullptr != request_header ? request_header->request_id.sequence_number : 0LL),
+    (nullptr != request_header ? request_header->source_timestamp : 0LL),
+    // rmw_take_response_request() will not take if taken==nullptr
+    (nullptr != taken ? *taken : false));
   return ret;
 }
 
@@ -4714,17 +4755,30 @@ extern "C" rmw_ret_t rmw_take_request(
     service, service->implementation_identifier, eclipse_cyclonedds_identifier,
     return RMW_RET_INCORRECT_RMW_IMPLEMENTATION);
   auto info = static_cast<CddsService *>(service->data);
-  return rmw_take_response_request(
+  rmw_ret_t ret = rmw_take_response_request(
     &info->service, request_header, ros_request, taken, nullptr,
     false);
+  if (TRACETOOLS_TRACEPOINT_ENABLED(rmw_take_request)) {
+    // Do not use the whole request_header->writer_guid, see the rmw_client_init tracepoint trigger
+    rmw_gid_t gid{};
+    memcpy(gid.data, &request_header->request_id.writer_guid, sizeof(info->service.pub->pubiid));
+    TRACETOOLS_DO_TRACEPOINT(
+      rmw_take_request,
+      static_cast<const void *>(service),
+      static_cast<const void *>(ros_request),
+      gid.data,
+      (nullptr != request_header ? request_header->request_id.sequence_number : 0LL),
+      *taken);
+  }
+  return ret;
 }
 
 static rmw_ret_t rmw_send_response_request(
   CddsCS * cs, const cdds_request_header_t & header,
-  const void * ros_data)
+  const void * ros_data, const dds_time_t timestamp)
 {
   const cdds_request_wrapper_t wrap = {header, const_cast<void *>(ros_data)};
-  if (dds_write(cs->pub->enth, static_cast<const void *>(&wrap)) >= 0) {
+  if (dds_write_ts(cs->pub->enth, static_cast<const void *>(&wrap), timestamp) >= 0) {
     return RMW_RET_OK;
   } else {
     RMW_SET_ERROR_MSG("cannot publish data");
@@ -4826,7 +4880,22 @@ extern "C" rmw_ret_t rmw_send_response(
     case client_present_t::MAYBE:
       return RMW_RET_TIMEOUT;
     case client_present_t::YES:
-      return rmw_send_response_request(&info->service, header, ros_response);
+      {
+        const dds_time_t timestamp = dds_time();
+        if (TRACETOOLS_TRACEPOINT_ENABLED(rmw_send_response)) {
+          // Do not use request_header->writer_guid, see the rmw_client_init tracepoint trigger
+          rmw_gid_t gid{};
+          memcpy(gid.data, &header.guid, sizeof(header.guid));
+          TRACETOOLS_DO_TRACEPOINT(
+            rmw_send_response,
+            static_cast<const void *>(service),
+            static_cast<const void *>(ros_response),
+            gid.data,
+            header.seq,
+            timestamp);
+        }
+        return rmw_send_response_request(&info->service, header, ros_response, timestamp);
+      }
     case client_present_t::GONE:
       return RMW_RET_OK;
   }
@@ -4849,15 +4918,21 @@ extern "C" rmw_ret_t rmw_send_request(
   cdds_request_header_t header;
   header.guid = info->client.pub->pubiid;
   header.seq = *sequence_id = ++next_request_id;
+  const dds_time_t timestamp = dds_time();
 
 #if REPORT_BLOCKED_REQUESTS
   {
     std::lock_guard<std::mutex> lock(info->lock);
-    info->reqtime[header.seq] = dds_time();
+    info->reqtime[header.seq] = timestamp;
   }
 #endif
 
-  return rmw_send_response_request(&info->client, header, ros_request);
+  TRACETOOLS_TRACEPOINT(
+    rmw_send_request,
+    static_cast<const void *>(client),
+    static_cast<const void *>(ros_request),
+    header.seq);
+  return rmw_send_response_request(&info->client, header, ros_request, timestamp);
 }
 
 static const rosidl_service_type_support_t * get_service_typesupport(
@@ -4895,11 +4970,8 @@ static void get_unique_csid(const rmw_node_t * node, client_service_id_t & id)
 {
   auto impl = node->context->impl;
   static_assert(
-    sizeof(dds_guid_t) <= sizeof(id.data),
+    sizeof(dds_guid_t) <= RMW_GID_STORAGE_SIZE,
     "client/service id assumed it can hold a DDSI GUID");
-  static_assert(
-    sizeof(dds_guid_t) <= sizeof((reinterpret_cast<rmw_gid_t *>(0))->data),
-    "client/service id assumes rmw_gid_t can hold a DDSI GUID");
   uint32_t x;
 
   {
@@ -5162,6 +5234,15 @@ extern "C" rmw_client_t * rmw_create_client(
   cleanup_client.cancel();
   cleanup_fini_cs.cancel();
   cleanup_info.cancel();
+  if (TRACETOOLS_TRACEPOINT_ENABLED(rmw_client_init)) {
+    // rmw_cyclonedds uses info->client.pub->pubiid as the internal request header GUID, which is
+    // the first half (8 bytes out of 16 bytes) of the rmw_request_id_t's writer_guid. The second
+    // half doesn't match when read from the client side and the service side, so only use the first
+    // half. The second half will be zeros on both client side and service side.
+    rmw_gid_t gid{};
+    memcpy(gid.data, &info->client.pub->pubiid, sizeof(info->client.pub->pubiid));
+    TRACETOOLS_DO_TRACEPOINT(rmw_client_init, static_cast<const void *>(rmw_client), gid.data);
+  }
   return rmw_client;
 }
 
@@ -5470,15 +5551,15 @@ extern "C" rmw_ret_t rmw_service_server_is_available(
   const rmw_client_t * client,
   bool * is_available)
 {
-  RET_NULL(node);
+  RMW_CHECK_ARGUMENT_FOR_NULL(node, RMW_RET_INVALID_ARGUMENT);
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
     node, node->implementation_identifier,
     eclipse_cyclonedds_identifier, return RMW_RET_INCORRECT_RMW_IMPLEMENTATION);
-  RET_NULL(client);
+  RMW_CHECK_ARGUMENT_FOR_NULL(client, RMW_RET_INVALID_ARGUMENT);
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
     client, client->implementation_identifier,
     eclipse_cyclonedds_identifier, return RMW_RET_INCORRECT_RMW_IMPLEMENTATION);
-  RET_NULL(is_available);
+  RMW_CHECK_ARGUMENT_FOR_NULL(is_available, RMW_RET_INVALID_ARGUMENT);
   *is_available = false;
 
   auto info = static_cast<CddsClient *>(client->data);
