@@ -2,6 +2,9 @@
 Changelog for package rmw_cyclonedds_cpp
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+4.1.0 (2025-04-25)
+------------------
+
 4.0.2 (2025-04-18)
 ------------------
 * Switch to ament_cmake_ros_core package (`#538 <https://github.com/ros2/rmw_cyclonedds/issues/538>`_)
