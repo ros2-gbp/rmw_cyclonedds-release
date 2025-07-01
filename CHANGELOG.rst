@@ -2,6 +2,11 @@
 Changelog for package rmw_cyclonedds_cpp
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+4.1.1 (2025-07-01)
+------------------
+* Update CMake requirement (`#539 <https://github.com/ros2/rmw_cyclonedds/issues/539>`_)
+* Contributors: mosfet80
+
 4.1.0 (2025-04-25)
 ------------------
 
