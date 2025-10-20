@@ -2,6 +2,11 @@
 Changelog for package rmw_cyclonedds_cpp
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+4.1.2 (2025-10-20)
+------------------
+* Do not include rosidl_typesupport\_{c,cpp} in rmw impl typesupport list (`#544 <https://github.com/ros2/rmw_cyclonedds/issues/544>`_)
+* Contributors: Christophe Bedard
+
 4.1.1 (2025-07-01)
 ------------------
 * Update CMake requirement (`#539 <https://github.com/ros2/rmw_cyclonedds/issues/539>`_)
