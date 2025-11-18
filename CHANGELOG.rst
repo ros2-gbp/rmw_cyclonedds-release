@@ -2,6 +2,11 @@
 Changelog for package rmw_cyclonedds_cpp
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+4.1.3 (2025-11-18)
+------------------
+* add : get clients, servers info (`#499 <https://github.com/ros2/rmw_cyclonedds/issues/499>`_)
+* Contributors: Minju, Lee
+
 4.1.2 (2025-10-20)
 ------------------
 * Do not include rosidl_typesupport\_{c,cpp} in rmw impl typesupport list (`#544 <https://github.com/ros2/rmw_cyclonedds/issues/544>`_)
