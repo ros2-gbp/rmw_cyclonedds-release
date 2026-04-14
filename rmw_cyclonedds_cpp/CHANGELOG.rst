@@ -2,6 +2,20 @@
 Changelog for package rmw_cyclonedds_cpp
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+4.1.4 (2026-04-14)
+------------------
+
+* Silence unused variable warning in Release builds (`#580 <https://github.com/ros2/rmw_cyclonedds/issues/580>`_)
+* Add key support and update Cyclone DDS compatibility (`#575 <https://github.com/ros2/rmw_cyclonedds/issues/575>`_)
+* Explicitly disable content filtering support (`#574 <https://github.com/ros2/rmw_cyclonedds/issues/574>`_)
+* Add tracepoint to ``rmw_take_loan_int`` (`#566 <https://github.com/ros2/rmw_cyclonedds/issues/566>`_)
+* Fix warnings about ``may be used uninitialized`` (`#573 <https://github.com/ros2/rmw_cyclonedds/issues/573>`_)
+* Improve MessageTypeSupport performance (`#562 <https://github.com/ros2/rmw_cyclonedds/issues/562>`_)
+* Improve serialization performance by optimizing ``dynamic_cast`` usage and replacing virtual functions with templates (`#553 <https://github.com/ros2/rmw_cyclonedds/issues/553>`_)
+* Remove defaults to trigger proper warnings (`#549 <https://github.com/ros2/rmw_cyclonedds/issues/549>`_)
+
+* Contributors: Brandon Simoncic, Janosch Machowinski, Oren Bell PhD, Shane Loretz, Tomoya Fujita, eboasson
+
 4.1.3 (2025-11-18)
 ------------------
 * add : get clients, servers info (`#499 <https://github.com/ros2/rmw_cyclonedds/issues/499>`_)
