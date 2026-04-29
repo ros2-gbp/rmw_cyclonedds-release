@@ -1,0 +1,12 @@
+Source: ros-lyrical-rmw-cyclonedds-cpp
+Section: misc
+Priority: optional
+Maintainer: Erik Boasson <erik.boasson@adlinktech.com>
+Build-Depends: debhelper (>= 9.0.0), ros-lyrical-ament-cmake-ros-core, ros-lyrical-ament-lint-auto <!nocheck>, ros-lyrical-ament-lint-common <!nocheck>, ros-lyrical-cyclonedds, ros-lyrical-iceoryx-binding-c, ros-lyrical-rcpputils, ros-lyrical-rcutils, ros-lyrical-rmw, ros-lyrical-rmw-dds-common, ros-lyrical-rmw-security-common, ros-lyrical-rosidl-runtime-c, ros-lyrical-rosidl-typesupport-introspection-c, ros-lyrical-rosidl-typesupport-introspection-cpp, ros-lyrical-tracetools, ros-lyrical-ros-workspace
+Homepage: https://index.ros.org/p/rmw_cyclonedds_cpp/#lyrical
+Standards-Version: 3.9.2
+
+Package: ros-lyrical-rmw-cyclonedds-cpp
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, ros-lyrical-cyclonedds, ros-lyrical-iceoryx-binding-c, ros-lyrical-rcpputils, ros-lyrical-rcutils, ros-lyrical-rmw, ros-lyrical-rmw-dds-common, ros-lyrical-rmw-security-common, ros-lyrical-rosidl-runtime-c, ros-lyrical-rosidl-typesupport-introspection-c, ros-lyrical-rosidl-typesupport-introspection-cpp, ros-lyrical-tracetools, ros-lyrical-ros-workspace
+Description: Implement the ROS middleware interface using Eclipse CycloneDDS in C++.
