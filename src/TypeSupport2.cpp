@@ -24,9 +24,6 @@
 
 namespace rmw_cyclonedds_cpp
 {
-const PrimitiveValueType primitive_value_type_boolean =
-  PrimitiveValueType(ROSIDL_TypeKind::BOOLEAN);
-
 class ROSIDLC_StructValueType : public StructValueType
 {
   const rosidl_typesupport_introspection_c__MessageMembers * impl;
@@ -46,9 +43,6 @@ public:
   static constexpr TypeGenerator gen = TypeGenerator::ROSIDL_C;
   explicit ROSIDLC_StructValueType(const rosidl_typesupport_introspection_c__MessageMembers * impl);
   size_t sizeof_struct() const override {return impl->size_of_;}
-  size_t cdrsizeof_struct() const override {throw std::logic_error("not implemented");}
-  size_t cdralignof_struct() const override {throw std::logic_error("not implemented");}
-  TypeGenerator type_generator() const override {return gen;}
   size_t n_members() const override {return impl->member_count_;}
   const Member * get_member(size_t index) const override {return &m_members.at(index);}
 };
@@ -72,9 +66,6 @@ public:
   explicit ROSIDLCPP_StructValueType(
     const rosidl_typesupport_introspection_cpp::MessageMembers * impl);
   size_t sizeof_struct() const override {return impl->size_of_;}
-  size_t cdrsizeof_struct() const override {throw std::logic_error("not implemented");}
-  size_t cdralignof_struct() const override {throw std::logic_error("not implemented");}
-  TypeGenerator type_generator() const override {return gen;}
   size_t n_members() const override {return impl->member_count_;}
   const Member * get_member(size_t index) const final {return &m_members.at(index);}
 };
@@ -158,8 +149,6 @@ ROSIDLC_StructValueType::ROSIDLC_StructValueType(
   const rosidl_typesupport_introspection_c__MessageMembers * impl)
 : impl{impl}, m_members{}, m_inner_value_types{}
 {
-  bool has_keys = false;
-  bool is_self_contained = true;
   for (size_t index = 0; index < impl->member_count_; index++) {
     auto member_impl = impl->members_[index];
 
@@ -170,10 +159,10 @@ ROSIDLC_StructValueType::ROSIDLC_StructValueType(
         element_value_type = m_inner_value_types.back().get();
         break;
       case ROSIDL_TypeKind::STRING:
-        element_value_type = make_value_type<ROSIDLC_StringValueType>(UINT32_MAX - 1);
+        element_value_type = make_value_type<ROSIDLC_StringValueType>();
         break;
       case ROSIDL_TypeKind::WSTRING:
-        element_value_type = make_value_type<ROSIDLC_WStringValueType>(UINT32_MAX / 2);
+        element_value_type = make_value_type<ROSIDLC_WStringValueType>();
         break;
       default:
         element_value_type =
@@ -182,13 +171,6 @@ ROSIDLC_StructValueType::ROSIDLC_StructValueType(
     }
 
     const AnyValueType * member_value_type;
-    if (member_impl.is_array_ && member_impl.array_size_ > UINT32_MAX) {
-      throw std::length_error("arrays > UINT32_MAX not supported");
-    }
-    uint32_t bound = UINT32_MAX;
-    if (member_impl.is_array_ && member_impl.array_size_ != 0 && member_impl.is_upper_bound_) {
-      bound = static_cast<uint32_t>(member_impl.array_size_);
-    }
     if (!member_impl.is_array_) {
       member_value_type = element_value_type;
     } else if (member_impl.array_size_ != 0 && !member_impl.is_upper_bound_) {
@@ -196,44 +178,23 @@ ROSIDLC_StructValueType::ROSIDLC_StructValueType(
         element_value_type, member_impl.array_size_);
     } else if (member_impl.size_function) {
       member_value_type = make_value_type<CallbackSpanSequenceValueType>(
-        element_value_type,
-        bound,
-        member_impl.size_function,
-        member_impl.get_const_function,
-        member_impl.get_function,
-        [member_impl](void * p, size_t s){
-          if (!member_impl.resize_function(p, s)) {throw std::bad_alloc();}
-        });
+        element_value_type, member_impl.size_function, member_impl.get_const_function);
     } else {
-      member_value_type = make_value_type<ROSIDLC_SpanSequenceValueType>(
-        element_value_type,
-        bound,
-        member_impl.resize_function);
-    }
-    if (member_impl.is_key_) {
-      has_keys = true;
-    }
-    if (!member_value_type->is_self_contained()) {
-      is_self_contained = false;
+      member_value_type = make_value_type<ROSIDLC_SpanSequenceValueType>(element_value_type);
     }
     m_members.push_back(
       Member{
         member_impl.name_,
         member_value_type,
         member_impl.offset_,
-        member_impl.is_key_
       });
   }
-  m_has_keys = has_keys;
-  m_is_self_contained = is_self_contained;
 }
 
 ROSIDLCPP_StructValueType::ROSIDLCPP_StructValueType(
   const rosidl_typesupport_introspection_cpp::MessageMembers * impl)
 : impl(impl)
 {
-  bool has_keys = false;
-  bool is_self_contained = true;
   for (size_t index = 0; index < impl->member_count_; index++) {
     auto member_impl = impl->members_[index];
 
@@ -244,10 +205,10 @@ ROSIDLCPP_StructValueType::ROSIDLCPP_StructValueType(
         element_value_type = m_inner_value_types.back().get();
         break;
       case ROSIDL_TypeKind::STRING:
-        element_value_type = make_value_type<ROSIDLCPP_StringValueType>(UINT32_MAX - 1);
+        element_value_type = make_value_type<ROSIDLCPP_StringValueType>();
         break;
       case ROSIDL_TypeKind::WSTRING:
-        element_value_type = make_value_type<ROSIDLCPP_U16StringValueType>(UINT32_MAX / 2);
+        element_value_type = make_value_type<ROSIDLCPP_U16StringValueType>();
         break;
       default:
         element_value_type =
@@ -256,43 +217,23 @@ ROSIDLCPP_StructValueType::ROSIDLCPP_StructValueType(
     }
 
     const AnyValueType * member_value_type;
-    if (member_impl.is_array_ && member_impl.array_size_ > UINT32_MAX) {
-      throw std::length_error("arrays > UINT32_MAX not supported");
-    }
-    uint32_t bound = UINT32_MAX;
-    if (member_impl.is_array_ && member_impl.array_size_ != 0 && member_impl.is_upper_bound_) {
-      bound = static_cast<uint32_t>(member_impl.array_size_);
-    }
     if (!member_impl.is_array_) {
       member_value_type = element_value_type;
     } else if (member_impl.array_size_ != 0 && !member_impl.is_upper_bound_) {
       member_value_type = make_value_type<ArrayValueType>(
         element_value_type, member_impl.array_size_);
     } else if (ROSIDL_TypeKind(member_impl.type_id_) == ROSIDL_TypeKind::BOOLEAN) {
-      member_value_type =
-        make_value_type<BoolVectorValueType>(
-        bound);
+      member_value_type = make_value_type<BoolVectorValueType>();
     } else {
       member_value_type = make_value_type<CallbackSpanSequenceValueType>(
-        element_value_type, bound,
-        member_impl.size_function, member_impl.get_const_function, member_impl.get_function,
-        member_impl.resize_function);
-    }
-    if (member_impl.is_key_) {
-      has_keys = true;
-    }
-    if (!member_value_type->is_self_contained()) {
-      is_self_contained = false;
+        element_value_type, member_impl.size_function, member_impl.get_const_function);
     }
     m_members.push_back(
       Member {
         member_impl.name_,
         member_value_type,
         member_impl.offset_,
-        member_impl.is_key_
       });
   }
-  m_has_keys = has_keys;
-  m_is_self_contained = is_self_contained;
 }
 }  // namespace rmw_cyclonedds_cpp
