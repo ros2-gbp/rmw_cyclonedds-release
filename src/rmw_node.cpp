@@ -952,7 +952,7 @@ static void handle_builtintopic_endpoint(
         if (RMW_RET_OK != rmw_dds_common::parse_type_hash_from_user_data(
             reinterpret_cast<const uint8_t *>(userdata), userdata_size, type_hash))
         {
-          RCUTILS_LOG_WARN_NAMED(
+          RCUTILS_LOG_DEBUG_NAMED(
             "rmw_cyclonedds_cpp",
             "Failed to parse type hash for topic '%s' with type '%s' from USER_DATA '%*s'.",
             s->topic_name, s->type_name,
@@ -3296,7 +3296,7 @@ extern "C" rmw_ret_t rmw_destroy_subscription(rmw_node_t * node, rmw_subscriptio
   rmw_error_string_t error_string;
   auto common = &node->context->impl->common;
   const auto cddssub = static_cast<const CddsSubscription *>(subscription->data);
-  ret = common->remove_publisher_graph(
+  ret = common->remove_subscriber_graph(
     cddssub->gid,
     node->name, node->namespace_);
   if (RMW_RET_OK != ret) {
