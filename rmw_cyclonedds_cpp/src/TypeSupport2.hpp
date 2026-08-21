@@ -114,6 +114,7 @@ enum class ROSIDL_TypeKind : uint8_t
 {
   FLOAT = tsi_enum::ROS_TYPE_FLOAT,
   DOUBLE = tsi_enum::ROS_TYPE_DOUBLE,
+  LONG_DOUBLE = tsi_enum::ROS_TYPE_LONG_DOUBLE,
   CHAR = tsi_enum::ROS_TYPE_CHAR,
   WCHAR = tsi_enum::ROS_TYPE_WCHAR,
   BOOLEAN = tsi_enum::ROS_TYPE_BOOLEAN,
@@ -304,6 +305,8 @@ struct PrimitiveValueType : public AnyValueType
         return sizeof(float);
       case ROSIDL_TypeKind::DOUBLE:
         return sizeof(double);
+      case ROSIDL_TypeKind::LONG_DOUBLE:
+        return sizeof(long double);
       case ROSIDL_TypeKind::CHAR:
         return sizeof(char);
       case ROSIDL_TypeKind::WCHAR:
@@ -391,7 +394,7 @@ public:
   EValueType e_value_type() const final {return EValueType::U16StringValueType;}
 };
 
-struct ROSIDLC_StringValueType : public U8StringValueType
+struct ROSIDLC_StringValueType final : public U8StringValueType
 {
 public:
   using type = rosidl_runtime_c__String;
@@ -413,7 +416,7 @@ public:
   size_t sizeof_type() const override {return sizeof(type);}
 };
 
-class ROSIDLC_WStringValueType : public U16StringValueType
+class ROSIDLC_WStringValueType final : public U16StringValueType
 {
 public:
   using type = rosidl_runtime_c__U16String;
@@ -431,7 +434,7 @@ public:
   size_t sizeof_type() const override {return sizeof(type);}
 };
 
-class ROSIDLCPP_StringValueType : public U8StringValueType
+class ROSIDLCPP_StringValueType final : public U8StringValueType
 {
 public:
   using type = std::string;
@@ -449,7 +452,7 @@ public:
   size_t sizeof_type() const override {return sizeof(type);}
 };
 
-class ROSIDLCPP_U16StringValueType : public U16StringValueType
+class ROSIDLCPP_U16StringValueType final : public U16StringValueType
 {
 public:
   using type = std::u16string;
