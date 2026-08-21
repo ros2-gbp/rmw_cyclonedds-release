@@ -2,6 +2,51 @@
 Changelog for package rmw_cyclonedds_cpp
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+4.2.1 (2026-08-21)
+------------------
+* print rmem warning per-process, and adjust the output filter. (`#602 <https://github.com/ros2/rmw_cyclonedds/issues/602>`_)
+* Warn when system net.core.rmem_max is too low for CycloneDDS (`#590 <https://github.com/ros2/rmw_cyclonedds/issues/590>`_)
+* Fix subscription graph cleanup on destruction (`#594 <https://github.com/ros2/rmw_cyclonedds/issues/594>`_)
+* Downgrade 'Failed to parse type hash' log from WARN to DEBUG (`#591 <https://github.com/ros2/rmw_cyclonedds/issues/591>`_)
+* use C++ 20 in default. (`#588 <https://github.com/ros2/rmw_cyclonedds/issues/588>`_)
+* Fix KEEP_ALL history handling in subscription callback (`#584 <https://github.com/ros2/rmw_cyclonedds/issues/584>`_)
+* Contributors: FAN YUCHEN, Tomoya Fujita, Tony Najjar, Yuchen Fan, ganla
+
+4.2.0 (2026-05-06)
+------------------
+
+4.1.4 (2026-04-14)
+------------------
+
+* Silence unused variable warning in Release builds (`#580 <https://github.com/ros2/rmw_cyclonedds/issues/580>`_)
+* Add key support and update Cyclone DDS compatibility (`#575 <https://github.com/ros2/rmw_cyclonedds/issues/575>`_)
+* Explicitly disable content filtering support (`#574 <https://github.com/ros2/rmw_cyclonedds/issues/574>`_)
+* Add tracepoint to ``rmw_take_loan_int`` (`#566 <https://github.com/ros2/rmw_cyclonedds/issues/566>`_)
+* Fix warnings about ``may be used uninitialized`` (`#573 <https://github.com/ros2/rmw_cyclonedds/issues/573>`_)
+* Improve MessageTypeSupport performance (`#562 <https://github.com/ros2/rmw_cyclonedds/issues/562>`_)
+* Improve serialization performance by optimizing ``dynamic_cast`` usage and replacing virtual functions with templates (`#553 <https://github.com/ros2/rmw_cyclonedds/issues/553>`_)
+* Remove defaults to trigger proper warnings (`#549 <https://github.com/ros2/rmw_cyclonedds/issues/549>`_)
+
+* Contributors: Brandon Simoncic, Janosch Machowinski, Oren Bell PhD, Shane Loretz, Tomoya Fujita, eboasson
+
+4.1.3 (2025-11-18)
+------------------
+* add : get clients, servers info (`#499 <https://github.com/ros2/rmw_cyclonedds/issues/499>`_)
+* Contributors: Minju, Lee
+
+4.1.2 (2025-10-20)
+------------------
+* Do not include rosidl_typesupport\_{c,cpp} in rmw impl typesupport list (`#544 <https://github.com/ros2/rmw_cyclonedds/issues/544>`_)
+* Contributors: Christophe Bedard
+
+4.1.1 (2025-07-01)
+------------------
+* Update CMake requirement (`#539 <https://github.com/ros2/rmw_cyclonedds/issues/539>`_)
+* Contributors: mosfet80
+
+4.1.0 (2025-04-25)
+------------------
+
 4.0.2 (2025-04-18)
 ------------------
 * Switch to ament_cmake_ros_core package (`#538 <https://github.com/ros2/rmw_cyclonedds/issues/538>`_)
