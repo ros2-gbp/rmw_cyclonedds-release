@@ -2,119 +2,20 @@
 Changelog for package rmw_cyclonedds_cpp
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-2.2.4 (2026-08-21)
+1.3.5 (2026-08-21)
 ------------------
-* Downgrade 'Failed to parse type hash' log from WARN to DEBUG (`#591 <https://github.com/ros2/rmw_cyclonedds/issues/591>`_) (`#597 <https://github.com/ros2/rmw_cyclonedds/issues/597>`_)
-* improve MessageTypeSupport performance. (`#562 <https://github.com/ros2/rmw_cyclonedds/issues/562>`_) (`#570 <https://github.com/ros2/rmw_cyclonedds/issues/570>`_)
-* Performance improvements in serialization (`#553 <https://github.com/ros2/rmw_cyclonedds/issues/553>`_) (`#554 <https://github.com/ros2/rmw_cyclonedds/issues/554>`_)
+* improve MessageTypeSupport performance. (`#562 <https://github.com/ros2/rmw_cyclonedds/issues/562>`_) (`#571 <https://github.com/ros2/rmw_cyclonedds/issues/571>`_)
 * Contributors: mergify[bot]
 
-2.2.3 (2025-03-12)
+1.3.4 (2022-11-07)
 ------------------
-* Added rmw_event_type_is_supported (`#532 <https://github.com/ros2/rmw_cyclonedds/issues/532>`_) (`#534 <https://github.com/ros2/rmw_cyclonedds/issues/534>`_)
-* Contributors: mergify[bot]
-
-2.2.2 (2024-07-12)
-------------------
-* Fix the triggering of guard conditions. (`#504 <https://github.com/ros2/rmw_cyclonedds/issues/504>`_) (`#505 <https://github.com/ros2/rmw_cyclonedds/issues/505>`_)
-  When a guard condition goes active, we have to remember
-  to increase the trig_idx so we look at the next trigger.
-  Otherwise, we can get into situations where we skip a
-  triggered member.
-  (cherry picked from commit 899bbdf73fb57c8f5926b31e9570f017b8c2fdb9)
-  Co-authored-by: Chris Lalancette <clalancette@gmail.com>
-* Contributors: mergify[bot]
-
-2.2.1 (2024-05-13)
-------------------
-* Set received_timestamp to system_clock::now() in message_info (`#491 <https://github.com/ros2/rmw_cyclonedds/issues/491>`_) (`#493 <https://github.com/ros2/rmw_cyclonedds/issues/493>`_)
-  * Set received_timestamp to steady_clock::now() in message_info
-  * Use 'system_clock' instead of 'steady_clock'
-  * Also update receive_timestamp for services.
-  (cherry picked from commit 76c9d8f38a03d160b258902af6d1d06f6ed9391e)
-  Co-authored-by: Michael Orlov <morlovmr@gmail.com>
-* Contributors: mergify[bot]
-
-2.2.0 (2024-04-09)
-------------------
-* Add tracepoint for publish/subscribe serialized message (`#485 <https://github.com/ros2/rmw_cyclonedds/issues/485>`_)
-  Co-authored-by: eboasson <eb@ilities.com>
-* Contributors: h-suzuki-isp
-
-2.1.1 (2024-03-28)
-------------------
-* Remove a bunch of unnecessary macros. (`#482 <https://github.com/ros2/rmw_cyclonedds/issues/482>`_)
-* compare string contents but string pointer addresses. (`#481 <https://github.com/ros2/rmw_cyclonedds/issues/481>`_)
-* Contributors: Chris Lalancette, Tomoya Fujita
-
-2.1.0 (2024-01-24)
-------------------
-* Add timestamp to rmw_publish tracepoint (`#454 <https://github.com/ros2/rmw_cyclonedds/issues/454>`_)
-* Contributors: Christopher Wecht
-
-2.0.0 (2023-11-06)
-------------------
-* avoid using dds common public mutex directly (`#474 <https://github.com/ros2/rmw_cyclonedds/issues/474>`_)
-* Contributors: Chen Lihui
-
-1.10.0 (2023-10-04)
--------------------
-* Add rmw count clients,services impl (`#427 <https://github.com/ros2/rmw_cyclonedds/issues/427>`_)
-* Minor revamp of the CMakeLists.txt. (`#468 <https://github.com/ros2/rmw_cyclonedds/issues/468>`_)
-* Contributors: Chris Lalancette, Minju, Lee
-
-1.9.0 (2023-08-21)
-------------------
-* Clear out errors once we have handled them. (`#464 <https://github.com/ros2/rmw_cyclonedds/issues/464>`_)
-* Instrument loaned message publication code path
-* Contributors: Chris Lalancette, Christophe Bedard
-
-1.8.0 (2023-06-12)
-------------------
-* Use TRACETOOLS\_ prefix for tracepoint-related macros (`#450 <https://github.com/ros2/rmw_cyclonedds/issues/450>`_)
-* Contributors: Christophe Bedard
-
-1.7.0 (2023-04-27)
-------------------
-
-1.6.0 (2023-04-12)
-------------------
-* Dynamic Subscription (BONUS: Allocators): rmw_cyclonedds (`#451 <https://github.com/ros2/rmw_cyclonedds/issues/451>`_)
-* Add stubs for new rmw interfaces (`#447 <https://github.com/ros2/rmw_cyclonedds/issues/447>`_)
-* [rmw_cyclonedds] Improve handling of dynamic discovery (`#429 <https://github.com/ros2/rmw_cyclonedds/issues/429>`_)
-* Call get_type_hash_func (`#448 <https://github.com/ros2/rmw_cyclonedds/issues/448>`_)
-* Type hash distribution in discovery (rep2011) (`#437 <https://github.com/ros2/rmw_cyclonedds/issues/437>`_)
-* Disable inconsistent topic events. (`#444 <https://github.com/ros2/rmw_cyclonedds/issues/444>`_)
-* Implement matched event (`#435 <https://github.com/ros2/rmw_cyclonedds/issues/435>`_)
-* Implement inconsistent topic. (`#431 <https://github.com/ros2/rmw_cyclonedds/issues/431>`_)
-* Contributors: Barry Xu, Chris Lalancette, Emerson Knapp, Geoffrey Biggs, methylDragon
-
-1.5.1 (2023-02-14)
-------------------
-* Make sure to add semicolons to the CHECK_TYPE_IDENTIFIER_MATCH. (`#432 <https://github.com/ros2/rmw_cyclonedds/issues/432>`_)
-* [rolling] Update maintainers - 2022-11-07 (`#428 <https://github.com/ros2/rmw_cyclonedds/issues/428>`_)
-* Contributors: Audrow Nash, Chris Lalancette
-
-1.5.0 (2022-11-02)
-------------------
-* Export CycloneDDS dependency (`#424 <https://github.com/ros2/rmw_cyclonedds/issues/424>`_)
-* add NULL check before accessing object. (`#423 <https://github.com/ros2/rmw_cyclonedds/issues/423>`_)
-* Add rmw_get_gid_for_client impl (`#402 <https://github.com/ros2/rmw_cyclonedds/issues/402>`_)
+* Export CycloneDDS dependency (`#424 <https://github.com/ros2/rmw_cyclonedds/issues/424>`_) (`#425 <https://github.com/ros2/rmw_cyclonedds/issues/425>`_)
+* Merge pull request `#420 <https://github.com/ros2/rmw_cyclonedds/issues/420>`_ from ros2/mergify/bp/humble/pr-410
 * Makes topic_name a const ref
 * Adds topic name to error msg when create_topic fails
-* Contributors: Brian, Shane Loretz, Tomoya Fujita, Tully Foote, Voldivh
-
-1.4.1 (2022-09-13)
-------------------
-* Improve error message when create_topic fails (`#405 <https://github.com/ros2/rmw_cyclonedds/issues/405>`_)
-* Change wrong use of %d to print uint32_t to PRIu32 (`#253 <https://github.com/ros2/rmw_cyclonedds/issues/253>`_)
-* Add cstring include. (`#393 <https://github.com/ros2/rmw_cyclonedds/issues/393>`_)
-* Contributors: Chris Lalancette, Shane Loretz, eboasson
-
-1.4.0 (2022-05-03)
-------------------
-* Handle 'best_available' QoS policies (`#389 <https://github.com/ros2/rmw_cyclonedds/issues/389>`_)
-* Contributors: Jose Luis Rivero
+* Improve error message when create_topic fails (`#405 <https://github.com/ros2/rmw_cyclonedds/issues/405>`_) (`#406 <https://github.com/ros2/rmw_cyclonedds/issues/406>`_)
+* [Fix] Add cstring header for memset (`#398 <https://github.com/ros2/rmw_cyclonedds/issues/398>`_)
+* Contributors: Homalozoa X, Tully Foote, Voldivh, mergify[bot]
 
 1.3.3 (2022-04-06)
 ------------------
@@ -280,7 +181,7 @@ Changelog for package rmw_cyclonedds_cpp
 * Updated error returns on rmw_take_serialized() and rmw_take_with_message_info() (`#242 <https://github.com/ros2/rmw_cyclonedds/issues/242>`_)
 * Updated error returns on rmw_take() (`#241 <https://github.com/ros2/rmw_cyclonedds/issues/241>`_)
 * Add quality declaration for Cyclone DDS (`#218 <https://github.com/ros2/rmw_cyclonedds/issues/218>`_)
-* Contributors: Erik Boasson, Joe Speed, Jose Tomas Lorente, Scott K Logan
+* Contributors: Erik Boasson, Joe Speed, Jose Tomas Lorente, Scott K Logan 
 
 0.16.0 (2020-09-14)
 -------------------

@@ -33,50 +33,66 @@
 
 namespace rmw_cyclonedds_cpp
 {
-template<typename Derived>
-struct CDRCursorBase
+
+struct CDRCursor
 {
+  CDRCursor() = default;
+  ~CDRCursor() = default;
+
+  // don't want to accidentally copy
+  explicit CDRCursor(CDRCursor const &) = delete;
+  void operator=(CDRCursor const & x) = delete;
+
+  // virtual functions to be implemented
+  // get the cursor's current offset.
+  virtual size_t offset() const = 0;
+  // advance the cursor.
+  virtual void advance(size_t n_bytes) = 0;
+  // Copy bytes to the current cursor location (if needed) and advance the cursor
+  virtual void put_bytes(const void * data, size_t size) = 0;
+  virtual bool ignores_data() const = 0;
+  // Move the logical origin this many places
+  virtual void rebase(ptrdiff_t relative_origin) = 0;
+
   void align(size_t n_bytes)
   {
     assert(n_bytes > 0);
-    size_t start_offset = static_cast<Derived *>(this)->offset();
+    size_t start_offset = offset();
     if (n_bytes == 1 || start_offset % n_bytes == 0) {
       return;
     }
-    static_cast<Derived *>(this)->advance(n_bytes - start_offset % n_bytes);
-    assert(static_cast<Derived *>(this)->offset() - start_offset < n_bytes);
-    assert(static_cast<Derived *>(this)->offset() % n_bytes == 0);
+    advance(n_bytes - start_offset % n_bytes);
+    assert(offset() - start_offset < n_bytes);
+    assert(offset() % n_bytes == 0);
   }
-
-  ptrdiff_t operator-(const CDRCursorBase & other) const
+  ptrdiff_t operator-(const CDRCursor & other) const
   {
-    return static_cast<ptrdiff_t>(static_cast<Derived *>(this)->offset()) -
-           static_cast<ptrdiff_t>(static_cast<Derived &>(other).offset());
+    return static_cast<ptrdiff_t>(offset()) - static_cast<ptrdiff_t>(other.offset());
   }
 };
 
-struct SizeCursor final : public CDRCursorBase<SizeCursor>
+struct SizeCursor : public CDRCursor
 {
   SizeCursor()
   : SizeCursor(0) {}
   explicit SizeCursor(size_t initial_offset)
   : m_offset(initial_offset) {}
-  explicit SizeCursor(SizeCursor & c)
+  explicit SizeCursor(CDRCursor & c)
   : m_offset(c.offset()) {}
 
   size_t m_offset;
-  size_t offset() const {return m_offset;}
-  void advance(size_t n_bytes) {m_offset += n_bytes;}
-  void put_bytes(const void *, size_t n_bytes) {advance(n_bytes);}
-  bool ignores_data() const {return true;}
-  void rebase(ptrdiff_t relative_origin)
+  size_t offset() const final {return m_offset;}
+  void advance(size_t n_bytes) final {m_offset += n_bytes;}
+  void put_bytes(const void *, size_t n_bytes) final {advance(n_bytes);}
+  bool ignores_data() const final {return true;}
+  void rebase(ptrdiff_t relative_origin) override
   {
     // we're moving the *origin* so this has to change in the *opposite* direction
     m_offset -= relative_origin;
   }
 };
 
-struct DataCursor final : public CDRCursorBase<DataCursor>
+struct DataCursor : public CDRCursor
 {
   const void * origin;
   void * position;
@@ -84,13 +100,13 @@ struct DataCursor final : public CDRCursorBase<DataCursor>
   explicit DataCursor(void * position)
   : origin(position), position(position) {}
 
-  size_t offset() const {return (const byte *)position - (const byte *)origin;}
-  void advance(size_t n_bytes)
+  size_t offset() const final {return (const byte *)position - (const byte *)origin;}
+  void advance(size_t n_bytes) final
   {
     std::memset(position, '\0', n_bytes);
     position = byte_offset(position, n_bytes);
   }
-  void put_bytes(const void * bytes, size_t n_bytes)
+  void put_bytes(const void * bytes, size_t n_bytes) final
   {
     if (n_bytes == 0) {
       return;
@@ -98,8 +114,8 @@ struct DataCursor final : public CDRCursorBase<DataCursor>
     std::memcpy(position, bytes, n_bytes);
     position = byte_offset(position, n_bytes);
   }
-  bool ignores_data() const {return false;}
-  void rebase(ptrdiff_t relative_origin) {origin = byte_offset(origin, relative_origin);}
+  bool ignores_data() const final {return false;}
+  void rebase(ptrdiff_t relative_origin) final {origin = byte_offset(origin, relative_origin);}
 };
 
 enum class EncodingVersion
@@ -220,7 +236,6 @@ public:
     serialize_top_level(&cursor, request);
   }
 
-  template<typename CDRCursor>
   void serialize_top_level(
     CDRCursor * cursor, const void * data) const
   {
@@ -242,7 +257,6 @@ public:
     }
   }
 
-  template<typename CDRCursor>
   void serialize_top_level(
     CDRCursor * cursor, const cdds_request_wrapper_t & request) const
   {
@@ -261,7 +275,6 @@ public:
   }
 
 protected:
-  template<typename CDRCursor>
   void put_rtps_header(CDRCursor * cursor) const
   {
     // beginning of message
@@ -284,7 +297,6 @@ protected:
     cursor->put_bytes(rtps_header.data(), rtps_header.size());
   }
 
-  template<typename CDRCursor>
   void serialize_u32(CDRCursor * cursor, size_t value) const
   {
     assert(value <= std::numeric_limits<uint32_t>::max());
@@ -419,7 +431,6 @@ protected:
     return sizeof_ < max_align ? sizeof_ : max_align;
   }
 
-  template<typename CDRCursor>
   void serialize(CDRCursor * cursor, const void * data, const PrimitiveValueType & value_type) const
   {
     cursor->align(get_cdr_alignof_primitive(value_type.type_kind()));
@@ -465,7 +476,6 @@ protected:
     }
   }
 
-  template<typename CDRCursor>
   void serialize(CDRCursor * cursor, const void * data, const U8StringValueType & value_type) const
   {
     auto str = value_type.data(data);
@@ -475,7 +485,6 @@ protected:
     cursor->put_bytes(&terminator, 1);
   }
 
-  template<typename CDRCursor>
   void serialize(CDRCursor * cursor, const void * data, const U16StringValueType & value_type) const
   {
     auto str = value_type.data(data);
@@ -494,14 +503,12 @@ protected:
     }
   }
 
-  template<typename CDRCursor>
   void serialize(CDRCursor * cursor, const void * data, const ArrayValueType & value_type) const
   {
     serialize_many(
       cursor, value_type.get_data(data), value_type.array_size(), value_type.element_value_type());
   }
 
-  template<typename CDRCursor>
   void serialize(
     CDRCursor * cursor, const void * data,
     const SpanSequenceValueType & value_type) const
@@ -512,7 +519,6 @@ protected:
       cursor, value_type.sequence_contents(data), count, value_type.element_value_type());
   }
 
-  template<typename CDRCursor>
   void serialize(
     CDRCursor * cursor, const void * data,
     const BoolVectorValueType & value_type) const
@@ -529,17 +535,37 @@ protected:
     }
   }
 
-  template<typename CDRCursor>
   void serialize(CDRCursor * cursor, const void * data, const AnyValueType * value_type) const
   {
     if (lookup_trivially_serialized(cursor->offset(), value_type)) {
       cursor->put_bytes(data, value_type->sizeof_type());
     } else {
-      value_type->apply([&](const auto & vt) {return serialize(cursor, data, vt);});
+//      value_type->apply([&](const auto & vt) {return serialize(cursor, data, vt);});
+      if (auto s = dynamic_cast<const PrimitiveValueType *>(value_type)) {
+        return serialize(cursor, data, *s);
+      }
+      if (auto s = dynamic_cast<const U8StringValueType *>(value_type)) {
+        return serialize(cursor, data, *s);
+      }
+      if (auto s = dynamic_cast<const U16StringValueType *>(value_type)) {
+        return serialize(cursor, data, *s);
+      }
+      if (auto s = dynamic_cast<const StructValueType *>(value_type)) {
+        return serialize(cursor, data, *s);
+      }
+      if (auto s = dynamic_cast<const ArrayValueType *>(value_type)) {
+        return serialize(cursor, data, *s);
+      }
+      if (auto s = dynamic_cast<const SpanSequenceValueType *>(value_type)) {
+        return serialize(cursor, data, *s);
+      }
+      if (auto s = dynamic_cast<const BoolVectorValueType *>(value_type)) {
+        return serialize(cursor, data, *s);
+      }
+      unreachable();
     }
   }
 
-  template<typename CDRCursor>
   void serialize_many(
     CDRCursor * cursor, const void * data, size_t count,
     const AnyValueType * vt) const
@@ -574,7 +600,6 @@ protected:
     }
   }
 
-  template<typename CDRCursor>
   void serialize(
     CDRCursor * cursor, const void * struct_data,
     const StructValueType & struct_info) const
