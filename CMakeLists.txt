@@ -12,15 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.20)
 
 project(rmw_cyclonedds_cpp)
-
-# Default to C++17
-if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 17)
-  set(CMAKE_CXX_STANDARD_REQUIRED ON)
-endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic -Wimplicit-fallthrough)
@@ -34,13 +28,16 @@ find_package(tracetools REQUIRED)
 
 find_package(CycloneDDS QUIET CONFIG)
 if(CycloneDDS_FOUND)
-  # Support for shared memory in RMW depends on support for shared memory being compiled in
-  # Cyclone DDS and iceoryx_binding_c being available
-  get_target_property(_cyclonedds_has_shm CycloneDDS::ddsc SHM_SUPPORT_IS_AVAILABLE)
-  if(_cyclonedds_has_shm)
-    find_package(iceoryx_binding_c REQUIRED)
-  else()
-    message(STATUS "Cyclone DDS is NOT compiled with support for shared memory")
+  if(CycloneDDS_VERSION VERSION_LESS 0.11)
+    # Support for shared memory in RMW depends on support for shared memory being compiled
+    # in Cyclone DDS for Cyclone version 0.10.x (and older) and iceoryx_binding_c being
+    # available
+    get_target_property(_cyclonedds_has_shm CycloneDDS::ddsc SHM_SUPPORT_IS_AVAILABLE)
+    if(_cyclonedds_has_shm)
+      find_package(iceoryx_binding_c REQUIRED)
+    else()
+      message(STATUS "Cyclone DDS is NOT compiled with support for shared memory")
+    endif()
   endif()
 else()
   message(WARNING "Could not find Eclipse Cyclone DDS - skipping '${PROJECT_NAME}'")
@@ -73,19 +70,22 @@ add_library(rmw_cyclonedds_cpp
   src/rmw_get_network_flow_endpoints.cpp
   src/rmw_node.cpp
   src/serdata.cpp
-  src/serdes.cpp
   src/u16string.cpp
-  src/exception.cpp
   src/demangle.cpp
-  src/deserialization_exception.cpp
   src/Serialization.cpp
   src/TypeSupport2.cpp
-  src/TypeSupport.cpp)
+  src/type_name.cpp
+  src/dyntype.cpp
+  src/dyntype_helper.c)
+
+configure_file("src/cdds_version.hpp.in" "src/cdds_version.hpp")
+target_include_directories(rmw_cyclonedds_cpp PRIVATE ${CMAKE_BINARY_DIR}/src)
 
 target_link_libraries(rmw_cyclonedds_cpp PUBLIC
   rmw::rmw)
 
 target_link_libraries(rmw_cyclonedds_cpp PRIVATE
+  ament_cmake_ros_core::ament_ros_cxx_standard
   CycloneDDS::ddsc
   rcutils::rcutils
   rcpputils::rcpputils
@@ -124,8 +124,8 @@ target_compile_definitions(${PROJECT_NAME}
 ament_export_targets(export_rmw_cyclonedds_cpp)
 
 register_rmw_implementation(
-  "c:rosidl_typesupport_c:rosidl_typesupport_introspection_c"
-  "cpp:rosidl_typesupport_cpp:rosidl_typesupport_introspection_cpp")
+  "c:rosidl_typesupport_introspection_c"
+  "cpp:rosidl_typesupport_introspection_cpp")
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
