@@ -14,6 +14,9 @@
 
 #include <cassert>
 #include <cstring>
+#ifdef __linux__
+#include <fstream>
+#endif
 #include <mutex>
 #include <unordered_map>
 #include <unordered_set>
@@ -567,7 +570,12 @@ extern "C" rmw_ret_t rmw_subscription_set_on_new_message_callback(
       return RMW_RET_ERROR;
     }
 
-    size_t events = std::min(data->unread_count, sub_qos.depth);
+    // For KEEP_ALL history, depth is reported as 0 (since CycloneDDS internally
+    // uses -1 for unlimited depth, which gets mapped to 0 in dds_qos_to_rmw_qos).
+    // In that case, pass through the full unread_count instead of clipping to 0.
+    size_t events = (sub_qos.depth > 0) ?
+      std::min(data->unread_count, sub_qos.depth) :
+      data->unread_count;
 
     callback(user_data, events);
     data->unread_count = 0;
@@ -952,7 +960,7 @@ static void handle_builtintopic_endpoint(
         if (RMW_RET_OK != rmw_dds_common::parse_type_hash_from_user_data(
             reinterpret_cast<const uint8_t *>(userdata), userdata_size, type_hash))
         {
-          RCUTILS_LOG_WARN_NAMED(
+          RCUTILS_LOG_DEBUG_NAMED(
             "rmw_cyclonedds_cpp",
             "Failed to parse type hash for topic '%s' with type '%s' from USER_DATA '%*s'.",
             s->topic_name, s->type_name,
@@ -1380,6 +1388,28 @@ rmw_context_impl_s::init(rmw_init_options_t * options, size_t domain_id)
     this->node_count++;
     return RMW_RET_OK;
   }
+
+#ifdef __linux__
+  {
+    // rmem_max is a system-wide setting, so warn only once per process
+    static std::once_flag rmem_max_warn_once;
+    std::call_once(
+      rmem_max_warn_once, []() {
+        std::ifstream rmem_max_file("/proc/sys/net/core/rmem_max");
+        if (rmem_max_file.is_open()) {
+          size_t rmem_max = 0;
+          rmem_max_file >> rmem_max;
+          if (rmem_max < 8388608) {
+            RCUTILS_LOG_WARN_NAMED(
+              "rmw_cyclonedds_cpp",
+              "system rmem_max (%zu) is lower than the recommended minimum of 8388608. "
+              "Increase it: sudo sysctl -w net.core.rmem_max=8388608",
+              rmem_max);
+          }
+        }
+      });
+  }
+#endif
 
   /* Take domains_lock and hold it until after the participant creation succeeded or
     failed: otherwise there is a race with rmw_destroy_node deleting the last participant
@@ -3296,7 +3326,7 @@ extern "C" rmw_ret_t rmw_destroy_subscription(rmw_node_t * node, rmw_subscriptio
   rmw_error_string_t error_string;
   auto common = &node->context->impl->common;
   const auto cddssub = static_cast<const CddsSubscription *>(subscription->data);
-  ret = common->remove_publisher_graph(
+  ret = common->remove_subscriber_graph(
     cddssub->gid,
     node->name, node->namespace_);
   if (RMW_RET_OK != ret) {
