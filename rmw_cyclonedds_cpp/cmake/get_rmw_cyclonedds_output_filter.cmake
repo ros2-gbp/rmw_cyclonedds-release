@@ -27,7 +27,5 @@ macro(get_rmw_cyclonedds_output_filter output_patterns)
       "unused arguments: ${ARGN}")
   endif()
 
-  string(CONCAT ${output_patterns}
-    ".*using network interface \\w+ \\(.*\\) selected arbitrarily from:.*\n"
-    ".*system rmem_max \\([0-9]+\\) is lower than the recommended minimum.*")
+  set(${output_patterns} ".*using network interface \\w+ \\(.*\\) selected arbitrarily from:.*")
 endmacro()
